@@ -1,6 +1,6 @@
 from connect import *
 from typing import Union
-from InfoStructure.Base import *
+from RaystationInfoStructure.BaseStructure import *
 
 
 class LoadPatientClass(object):
