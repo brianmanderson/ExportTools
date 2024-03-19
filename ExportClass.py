@@ -11,8 +11,8 @@ class LoadPatientClass(object):
         patient = self.patient_db.LoadPatient(PatientInfo=info, AllowPatientUpgrade=False)
         return patient
 
-    def load_patient(self, rs_uid: str):
-        info = self.patient_db.QueryPatientInfo(Filter={"Id": rs_uid}, UseIndexService=False)
+    def load_patient(self, mrn: str):
+        info = self.patient_db.QueryPatientInfo(Filter={"PatientID": mrn}, UseIndexService=False)
         patient = self.patient_db.LoadPatient(PatientInfo=info[0], AllowPatientUpgrade=False)
         return patient
 
@@ -29,7 +29,7 @@ class ExportBaseClass(object):
         self.export_path = path
 
     def set_patient(self, patient: PatientClass):
-        self.rs_patient = self.patient_loader.load_patient(patient.RS_UID)
+        self.rs_patient = self.patient_loader.load_patient(patient.MRN)
 
     def export_all_in_patient(self, patient: PatientClass):
         self.set_patient(patient)
@@ -37,9 +37,9 @@ class ExportBaseClass(object):
         self.export_dose(patient)
 
     def export_examinations(self, patient: PatientClass):
-        for case in patient.Cases.values():
+        for case in patient.Cases:
             rs_case = self.rs_patient.Cases[case.CaseName]
-            for exam in case.Examinations.values():
+            for exam in case.Examinations:
                 export_path = os.path.join(self.export_path, "Case_{}".format(case.Case_UID),
                                            "Exam_{}".format(exam.Exam_UID))
                 if not os.path.exists(export_path):
@@ -48,9 +48,9 @@ class ExportBaseClass(object):
                                               Examinations=[exam.ExamName])
 
     def export_examinations_and_structures(self, patient: PatientClass):
-        for case in patient.Cases.values():
+        for case in patient.Cases:
             rs_case = self.rs_patient.Cases[case.CaseName]
-            for exam in case.Examinations.values():
+            for exam in case.Examinations:
                 export_path = os.path.join(self.export_path, "Case_{}".format(case.Case_UID),
                                            "Exam_{}".format(exam.Exam_UID))
                 if not os.path.exists(export_path):
@@ -60,9 +60,9 @@ class ExportBaseClass(object):
                                               RtStructureSetsForExaminations=[exam.ExamName])
 
     def export_dose(self, patient: PatientClass):
-        for case in patient.Cases.values():
+        for case in patient.Cases:
             rs_case = self.rs_patient.Cases[case.CaseName]
-            for treatment_plan in case.TreatmentPlans.values():
+            for treatment_plan in case.TreatmentPlans:
                 plan_name = treatment_plan.PlanName
                 for beam_set in treatment_plan.BeamSets.values():
                     beam_set_name = beam_set.DicomPlanLabel
